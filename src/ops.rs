@@ -7,7 +7,7 @@ impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Add<U> for R
     fn add(self, other: U) -> Self {
         let other: RelUncertainty<N> = other.into();
         Self::new(
-            self.value() + other.value(),
+            self.mean() + other.mean(),
             (self.uncertainty().powi(2) + other.uncertainty().powi(2)).sqrt(),
         )
     }
@@ -18,7 +18,7 @@ impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Add<U> for A
     fn add(self, other: U) -> Self {
         let other: AbsUncertainty<N> = other.into();
         Self::new(
-            self.value() + other.value(),
+            self.mean() + other.mean(),
             (self.uncertainty().powi(2) + other.uncertainty().powi(2)).sqrt(),
         )
     }
@@ -29,7 +29,7 @@ impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Sub<U> for R
     fn sub(self, other: U) -> Self {
         let other: RelUncertainty<N> = other.into();
         Self::new(
-            self.value() - other.value(),
+            self.mean() - other.mean(),
             (self.uncertainty().powi(2) + other.uncertainty().powi(2)).sqrt(),
         )
     }
@@ -40,7 +40,7 @@ impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Sub<U> for A
     fn sub(self, other: U) -> Self {
         let other: AbsUncertainty<N> = other.into();
         Self::new(
-            self.value() - other.value(),
+            self.mean() - other.mean(),
             (self.uncertainty().powi(2) + other.uncertainty().powi(2)).sqrt(),
         )
     }
@@ -51,9 +51,9 @@ impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Mul<U> for R
     fn mul(self, other: U) -> Self {
         let other: RelUncertainty<N> = other.into();
         Self::new(
-            self.value() * other.value(),
-            (self.uncertainty().powi(2) * other.value().powi(2)
-                + other.uncertainty().powi(2) * self.value().powi(2))
+            self.mean() * other.mean(),
+            (self.uncertainty().powi(2) * other.mean().powi(2)
+                + other.uncertainty().powi(2) * self.mean().powi(2))
             .sqrt(),
         )
     }
@@ -64,9 +64,9 @@ impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Mul<U> for A
     fn mul(self, other: U) -> Self {
         let other: AbsUncertainty<N> = other.into();
         Self::new(
-            self.value() * other.value(),
-            (self.uncertainty().powi(2) * other.value().powi(2)
-                + other.uncertainty().powi(2) * self.value().powi(2))
+            self.mean() * other.mean(),
+            (self.uncertainty().powi(2) * other.mean().powi(2)
+                + other.uncertainty().powi(2) * self.mean().powi(2))
             .sqrt(),
         )
     }
@@ -77,10 +77,9 @@ impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Div<U> for R
     fn div(self, other: U) -> Self {
         let other: RelUncertainty<N> = other.into();
         Self::new(
-            self.value() / other.value(),
-            (self.uncertainty().powi(2) / other.value().powi(2)
-                + self.value().powi(2)
-                    * (other.uncertainty() * other.value().powi(2)).abs().powi(2))
+            self.mean() / other.mean(),
+            (self.uncertainty().powi(2) / other.mean().powi(2)
+                + self.mean().powi(2) * (other.uncertainty() * other.mean().powi(2)).abs().powi(2))
             .sqrt(),
         )
     }
@@ -91,10 +90,9 @@ impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Div<U> for A
     fn div(self, other: U) -> Self {
         let other: AbsUncertainty<N> = other.into();
         Self::new(
-            self.value() / other.value(),
-            (self.uncertainty().powi(2) / other.value().powi(2)
-                + self.value().powi(2)
-                    * (other.uncertainty() * other.value().powi(2)).abs().powi(2))
+            self.mean() / other.mean(),
+            (self.uncertainty().powi(2) / other.mean().powi(2)
+                + self.mean().powi(2) * (other.uncertainty() * other.mean().powi(2)).abs().powi(2))
             .sqrt(),
         )
     }
