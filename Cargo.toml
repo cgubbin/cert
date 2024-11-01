@@ -1,5 +1,6 @@
 [package]
 name = "cert"
+description = "Uncertainty propagation and manipulation"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
