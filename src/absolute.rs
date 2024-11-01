@@ -1,12 +1,15 @@
+//! Absolute uncertainties.
+//!
+//! Absolute uncertainties are characterized by a mean value and a standard deviation
+
 use super::{RelUncertainty, Uncertainty};
-use num_traits::{Float, FromPrimitive, Zero};
+use num_traits::{Float, Zero};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Debug, Default, Copy, Clone)]
-#[cfg_attr(test, derive(PartialEq))]
+#[derive(Debug, Default, Copy, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 /// An absolute uncertainty.
 ///
@@ -24,7 +27,7 @@ impl<N: fmt::Display> fmt::Display for AbsUncertainty<N> {
     }
 }
 
-impl<N: Default + Float + FromPrimitive + Zero> Zero for AbsUncertainty<N> {
+impl<N: Float + Zero> Zero for AbsUncertainty<N> {
     fn zero() -> Self {
         Self {
             mean: N::zero(),
@@ -37,19 +40,19 @@ impl<N: Default + Float + FromPrimitive + Zero> Zero for AbsUncertainty<N> {
     }
 }
 
-impl<N: Default + Float + FromPrimitive> Into<RelUncertainty<N>> for AbsUncertainty<N> {
-    fn into(self: AbsUncertainty<N>) -> RelUncertainty<N> {
-        RelUncertainty::new(self.mean, self.standard_deviation / self.mean)
+impl<N: Float> From<AbsUncertainty<N>> for RelUncertainty<N> {
+    fn from(val: AbsUncertainty<N>) -> RelUncertainty<N> {
+        RelUncertainty::new(val.mean, val.standard_deviation / val.mean)
     }
 }
 
-impl<N: Default + Float + FromPrimitive> Uncertainty for AbsUncertainty<N> {
+impl<N: Float + Zero> Uncertainty for AbsUncertainty<N> {
     type Float = N;
 
     fn new(mean: N, standard_deviation: N) -> AbsUncertainty<N> {
         AbsUncertainty {
             mean,
-            standard_deviation,
+            standard_deviation: standard_deviation.abs(),
         }
     }
 
@@ -73,7 +76,10 @@ impl<N: Default + Float + FromPrimitive> Uncertainty for AbsUncertainty<N> {
 
 #[cfg(test)]
 mod tests {
-    use super::AbsUncertainty;
+    use super::{AbsUncertainty, Uncertainty};
+    use crate::RelUncertainty;
+    use approx::assert_relative_eq;
+    use rand::{thread_rng, Rng};
 
     #[test]
     fn test_send() {
@@ -85,5 +91,17 @@ mod tests {
     fn test_sync() {
         fn assert_sync<T: Sync>() {}
         assert_sync::<AbsUncertainty<f64>>();
+    }
+
+    #[test]
+    fn test_absolute_round_trip() {
+        let mut rng = thread_rng();
+        let absolute = AbsUncertainty::<f64>::new(rng.gen(), rng.gen());
+
+        let relative = RelUncertainty::from(absolute);
+        let result = AbsUncertainty::from(relative);
+
+        assert_relative_eq!(absolute.mean(), result.mean());
+        assert_relative_eq!(absolute.standard_deviation(), result.standard_deviation());
     }
 }

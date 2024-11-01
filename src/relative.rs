@@ -1,12 +1,16 @@
+//! Relative uncertainties.
+//!
+//! Relative uncertainties are characterized by a mean value and a coefficient of variation. This
+//! describes the values standard deviation as a fraction of the mean value.
+
 use super::{AbsUncertainty, Uncertainty};
-use num_traits::{Float, FromPrimitive, Zero};
+use num_traits::{Float, Zero};
+use std::fmt;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use std::fmt;
 
-#[derive(Debug, Default, Copy, Clone)]
-#[cfg_attr(test, derive(PartialEq))]
+#[derive(Debug, Default, Copy, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 /// A relative uncertainty.
 ///
@@ -21,7 +25,13 @@ pub struct RelUncertainty<N> {
     coefficient_of_variation: N,
 }
 
-impl<N: Default + Float + FromPrimitive + Zero> Zero for RelUncertainty<N> {
+impl<N: Float + Zero + fmt::Display> fmt::Display for RelUncertainty<N> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:.2} ± {:.2}", self.mean, self.standard_deviation())
+    }
+}
+
+impl<N: Float + Zero> Zero for RelUncertainty<N> {
     fn zero() -> Self {
         Self {
             mean: N::zero(),
@@ -34,19 +44,19 @@ impl<N: Default + Float + FromPrimitive + Zero> Zero for RelUncertainty<N> {
     }
 }
 
-impl<N: Default + Float + FromPrimitive> Into<AbsUncertainty<N>> for RelUncertainty<N> {
-    fn into(self: RelUncertainty<N>) -> AbsUncertainty<N> {
-        AbsUncertainty::new(self.mean, self.coefficient_of_variation * self.mean)
+impl<N: Float + Zero> From<RelUncertainty<N>> for AbsUncertainty<N> {
+    fn from(val: RelUncertainty<N>) -> AbsUncertainty<N> {
+        AbsUncertainty::new(val.mean, val.coefficient_of_variation * val.mean)
     }
 }
 
-impl<N: Default + Float + FromPrimitive> Uncertainty for RelUncertainty<N> {
+impl<N: Float + Zero> Uncertainty for RelUncertainty<N> {
     type Float = N;
 
     fn new(mean: N, coefficient_of_variation: N) -> RelUncertainty<N> {
         RelUncertainty {
             mean,
-            coefficient_of_variation,
+            coefficient_of_variation: coefficient_of_variation.abs(),
         }
     }
 
@@ -67,20 +77,12 @@ impl<N: Default + Float + FromPrimitive> Uncertainty for RelUncertainty<N> {
     }
 }
 
-impl<N: Float + FromPrimitive + fmt::Display> fmt::Display for RelUncertainty<N> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{:2} ± {:2}",
-            self.mean,
-            self.coefficient_of_variation * N::from_f64(100.0).unwrap()
-        )
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::RelUncertainty;
+    use super::{RelUncertainty, Uncertainty};
+    use crate::AbsUncertainty;
+    use approx::assert_relative_eq;
+    use rand::{thread_rng, Rng};
 
     #[test]
     fn test_send() {
@@ -92,5 +94,17 @@ mod tests {
     fn test_sync() {
         fn assert_sync<T: Sync>() {}
         assert_sync::<RelUncertainty<f64>>();
+    }
+
+    #[test]
+    fn test_relative_round_trip() {
+        let mut rng = thread_rng();
+        let relative = RelUncertainty::<f64>::new(rng.gen(), rng.gen());
+
+        let absolute = AbsUncertainty::from(relative);
+        let result = RelUncertainty::from(absolute);
+
+        assert_relative_eq!(relative.mean(), result.mean());
+        assert_relative_eq!(relative.standard_deviation(), result.standard_deviation());
     }
 }

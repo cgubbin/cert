@@ -1,8 +1,8 @@
 use super::{AbsUncertainty, RelUncertainty, Uncertainty};
-use num_traits::{Float, FromPrimitive};
+use num_traits::Float;
 use std::ops::{Add, Div, Mul, Sub};
 
-impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Add<U> for RelUncertainty<N> {
+impl<N: Float, U: Uncertainty<Float = N>> Add<U> for RelUncertainty<N> {
     type Output = RelUncertainty<N>;
     fn add(self, other: U) -> Self {
         let other: RelUncertainty<N> = other.into();
@@ -13,7 +13,7 @@ impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Add<U> for R
     }
 }
 
-impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Add<U> for AbsUncertainty<N> {
+impl<N: Float, U: Uncertainty<Float = N>> Add<U> for AbsUncertainty<N> {
     type Output = AbsUncertainty<N>;
     fn add(self, other: U) -> Self {
         let other: AbsUncertainty<N> = other.into();
@@ -24,7 +24,7 @@ impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Add<U> for A
     }
 }
 
-impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Sub<U> for RelUncertainty<N> {
+impl<N: Float, U: Uncertainty<Float = N>> Sub<U> for RelUncertainty<N> {
     type Output = RelUncertainty<N>;
     fn sub(self, other: U) -> Self {
         let other: RelUncertainty<N> = other.into();
@@ -35,7 +35,7 @@ impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Sub<U> for R
     }
 }
 
-impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Sub<U> for AbsUncertainty<N> {
+impl<N: Float, U: Uncertainty<Float = N>> Sub<U> for AbsUncertainty<N> {
     type Output = AbsUncertainty<N>;
     fn sub(self, other: U) -> Self {
         let other: AbsUncertainty<N> = other.into();
@@ -46,7 +46,7 @@ impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Sub<U> for A
     }
 }
 
-impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Mul<U> for RelUncertainty<N> {
+impl<N: Float, U: Uncertainty<Float = N>> Mul<U> for RelUncertainty<N> {
     type Output = RelUncertainty<N>;
     fn mul(self, other: U) -> Self {
         let other: RelUncertainty<N> = other.into();
@@ -59,7 +59,7 @@ impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Mul<U> for R
     }
 }
 
-impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Mul<U> for AbsUncertainty<N> {
+impl<N: Float, U: Uncertainty<Float = N>> Mul<U> for AbsUncertainty<N> {
     type Output = AbsUncertainty<N>;
     fn mul(self, other: U) -> Self {
         let other: AbsUncertainty<N> = other.into();
@@ -72,7 +72,7 @@ impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Mul<U> for A
     }
 }
 
-impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Div<U> for RelUncertainty<N> {
+impl<N: Float, U: Uncertainty<Float = N>> Div<U> for RelUncertainty<N> {
     type Output = RelUncertainty<N>;
     fn div(self, other: U) -> Self {
         let other: RelUncertainty<N> = other.into();
@@ -85,7 +85,7 @@ impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Div<U> for R
     }
 }
 
-impl<N: Default + Float + FromPrimitive, U: Uncertainty<Float = N>> Div<U> for AbsUncertainty<N> {
+impl<N: Float, U: Uncertainty<Float = N>> Div<U> for AbsUncertainty<N> {
     type Output = AbsUncertainty<N>;
     fn div(self, other: U) -> Self {
         let other: AbsUncertainty<N> = other.into();

@@ -1,22 +1,25 @@
+//! Defines the [`Uncertainty`] trait.
+//!
+//! The uncertainty trait defines common behaviours for quantities with an associated uncertainty.
+
 use super::{AbsUncertainty, RelUncertainty};
-use num_traits::{Float, FromPrimitive, Zero};
+use num_traits::{Float, One, Zero};
 use std::ops;
 
-/// Used to define behaviour for values which have uncertain values.
+/// Used to define behaviour for values which have associated uncertainty.
 pub trait Uncertainty:
     Sized
     + Copy
-    + Default
     + Into<AbsUncertainty<Self::Float>>
     + Into<RelUncertainty<Self::Float>>
     + ops::Add<Self, Output = Self>
     + ops::Div<Self, Output = Self>
     + ops::Mul<Self, Output = Self>
     + ops::Sub<Self, Output = Self>
-    + num_traits::Zero
+    + Zero
 {
     /// The underlying float type for the uncertainty
-    type Float: Float + FromPrimitive + Zero;
+    type Float: Float + Zero;
 
     fn new(value: Self::Float, uncertainty: Self::Float) -> Self;
 
@@ -45,10 +48,54 @@ pub trait Uncertainty:
     fn powi(&self, n: i32) -> Self {
         Self::new(
             self.mean().powi(n),
-            (<Self::Float as FromPrimitive>::from_i32(n).unwrap().powi(2)
+            ((Self::Float::one() + Self::Float::one()).powi(n)
                 * self.mean().powi(2 * n - 2)
                 * self.uncertainty().powi(2))
             .sqrt(),
         )
+    }
+}
+
+impl Uncertainty for f64 {
+    type Float = f64;
+
+    fn new(value: f64, _uncertainty: f64) -> f64 {
+        value
+    }
+
+    fn mean(&self) -> Self::Float {
+        *self
+    }
+
+    fn standard_deviation(&self) -> Self::Float {
+        0.0
+    }
+
+    fn coefficient_of_variation(&self) -> Self::Float {
+        0.0
+    }
+
+    fn uncertainty(&self) -> Self::Float {
+        0.0
+    }
+
+    fn is_certain(&self) -> bool {
+        true
+    }
+
+    fn powi(&self, n: i32) -> Self {
+        <f64 as Float>::powi(*self, n)
+    }
+}
+
+impl From<f64> for AbsUncertainty<f64> {
+    fn from(val: f64) -> AbsUncertainty<f64> {
+        AbsUncertainty::new(val, 0.0)
+    }
+}
+
+impl From<f64> for RelUncertainty<f64> {
+    fn from(val: f64) -> RelUncertainty<f64> {
+        RelUncertainty::new(val, 0.0)
     }
 }
