@@ -1,6 +1,6 @@
 use super::{AbsUncertainty, RelUncertainty, Uncertainty};
 use num_traits::Float;
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 impl<N: Float, U: Uncertainty<Float = N>> Add<U> for RelUncertainty<N> {
     type Output = RelUncertainty<N>;
@@ -95,5 +95,19 @@ impl<N: Float, U: Uncertainty<Float = N>> Div<U> for AbsUncertainty<N> {
                 + self.mean().powi(2) * (other.uncertainty() * other.mean().powi(2)).abs().powi(2))
             .sqrt(),
         )
+    }
+}
+
+impl<N: Float> Neg for AbsUncertainty<N> {
+    type Output = Self;
+    fn neg(self) -> Self::Output {
+        Self::new(-self.mean(), self.uncertainty())
+    }
+}
+
+impl<N: Float> Neg for RelUncertainty<N> {
+    type Output = Self;
+    fn neg(self) -> Self::Output {
+        Self::new(-self.mean(), self.uncertainty())
     }
 }
