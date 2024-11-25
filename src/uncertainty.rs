@@ -143,3 +143,15 @@ impl From<f32> for RelUncertainty<f32> {
         RelUncertainty::new(val, 0.0)
     }
 }
+
+impl From<AbsUncertainty<f32>> for f32 {
+    fn from(val: AbsUncertainty<f32>) -> f32 {
+        val.mean()
+    }
+}
+
+impl From<AbsUncertainty<f64>> for f64 {
+    fn from(val: AbsUncertainty<f64>) -> f64 {
+        val.mean()
+    }
+}
