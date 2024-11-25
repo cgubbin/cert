@@ -99,3 +99,47 @@ impl From<f64> for RelUncertainty<f64> {
         RelUncertainty::new(val, 0.0)
     }
 }
+
+impl Uncertainty for f32 {
+    type Float = f32;
+
+    fn new(value: f32, _uncertainty: f32) -> f32 {
+        value
+    }
+
+    fn mean(&self) -> Self::Float {
+        *self
+    }
+
+    fn standard_deviation(&self) -> Self::Float {
+        0.0
+    }
+
+    fn coefficient_of_variation(&self) -> Self::Float {
+        0.0
+    }
+
+    fn uncertainty(&self) -> Self::Float {
+        0.0
+    }
+
+    fn is_certain(&self) -> bool {
+        true
+    }
+
+    fn powi(&self, n: i32) -> Self {
+        <f32 as Float>::powi(*self, n)
+    }
+}
+
+impl From<f32> for AbsUncertainty<f32> {
+    fn from(val: f32) -> AbsUncertainty<f32> {
+        AbsUncertainty::new(val, 0.0)
+    }
+}
+
+impl From<f32> for RelUncertainty<f32> {
+    fn from(val: f32) -> RelUncertainty<f32> {
+        RelUncertainty::new(val, 0.0)
+    }
+}
